@@ -1,132 +1,114 @@
 package org.example;
 
+import org.example.Entity.Fractional;
+
 import java.io.*;
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
 
-        try (BufferedReader br = new BufferedReader(new FileReader("data.txt"))) {
-            String[] matrixSize = br.readLine().split(" ");
-            System.out.println(Arrays.toString(matrixSize));
+        HashMap<String, Object> hashMap = readFile("data.txt");
+        int matrixColumns = 0;
+        int matrixRows = 0;
+        String[] baseXtemp = new String[0];
+        Fractional[][] matrixOfCoef = new Fractional[0][];
+        if (hashMap!=null) {
+            matrixColumns = (int) hashMap.get("matrixColumns");
+            matrixRows = (int) hashMap.get("matrixRows");
+            baseXtemp = (String[]) hashMap.get("baseXtemp");
+            matrixOfCoef = (Fractional[][]) hashMap.get("matrixOfCoef");
+        }else {
+            System.exit(0);
+        }
+        Integer[] baseX = new Integer[baseXtemp.length];
+        Integer[] startColums = new Integer[baseXtemp.length];
+        for (int i = 0; i < baseXtemp.length; i++) {
+            baseX[i] = Integer.parseInt(baseXtemp[i]);
+            startColums[i] = i + 1;
+        }
+        
+        for (int i = 0; i != matrixOfCoef.length; i++) {
+            System.out.println(Arrays.toString(matrixOfCoef[i]));
+        }
+        System.out.println(Arrays.toString(baseXtemp));
+        System.out.println("\n");
 
-            int matrixColumns = Integer.parseInt(matrixSize[1]);
-            int matrixRows = Integer.parseInt(matrixSize[0]);
+        System.out.println("Меняем столбцы местами для удобства");
+        swapColumns(matrixOfCoef, startColums, baseX);
+        for (int i = 0; i != matrixOfCoef.length; i++) {
+            System.out.println(Arrays.toString(matrixOfCoef[i]));
+        }
+        System.out.println("\n");
 
-            Fractional[][] matrixOfCoef = new Fractional[matrixRows][matrixColumns];
+        System.out.println("Прямой ход");
+        //Прямой ход
+        matrixOfCoef = straightRunning(matrixOfCoef, matrixRows, matrixColumns);
+        if (matrixOfCoef == null) {
 
-            for (int i = 0; i != matrixRows; i++) {
-                String[] vectorOfCoef = br.readLine().split(" ");
-                for (int j = 0; j != matrixColumns; j++) {
-                    matrixOfCoef[i][j] = Fractional.createFractional(vectorOfCoef[j]);
-                }
-            }
-
-            String[] baseXtemp = br.readLine().split(" ");
-            Integer[] baseX = new Integer[baseXtemp.length];
-            Integer[] startColums = new Integer[baseXtemp.length];
-            for (int i = 0; i < baseXtemp.length; i++) {
-                baseX[i] = Integer.parseInt(baseXtemp[i]);
-                startColums[i] = i + 1;
-            }
-
-            for (int i = 0; i != matrixOfCoef.length; i++) {
-                System.out.println(Arrays.toString(matrixOfCoef[i]));
-            }
-            System.out.println(Arrays.toString(baseXtemp));
-            System.out.println("\n");
-
-            System.out.println("Меняем столбцы местами для удобства");
-            swapColumns(matrixOfCoef, startColums, baseX);
-            for (int i = 0; i != matrixOfCoef.length; i++) {
-                System.out.println(Arrays.toString(matrixOfCoef[i]));
-            }
-            System.out.println("\n");
-
-            matrixOfCoef = straightRunning(matrixOfCoef, matrixRows, matrixColumns);
-            if (matrixOfCoef == null) {
-
-                System.exit(0);
-            }
-
-            boolean flag = true;
-            //текущая строчка
-            int i = 0;
-            //индекс строки с которой надо будет поменять текущую строку
-            int coefSwap = 0;
-            Fractional CoefMinusOne = new Fractional(-1, 1);
-            Fractional CoefOne = new Fractional(1, 1);
-
-            System.out.println("Обратный ход");
-            //Обратный ход
-            flag = true;
-            i = matrixRows - 1; //i = 3 - 1 = 2
-            System.out.println();
-            for (int t = 0; t != matrixOfCoef.length; t++) {
-                System.out.println(Arrays.toString(matrixOfCoef[t]));
-            }
-            System.out.println();
-            while (flag) {
-                //проверяем что число не равно нулю, чтобы сделать из него единицу
-                if (matrixOfCoef[i][i].getNumerator() != 0) {
-                    //пробегаем строчки ниже нашей
-                    for (int j = i - 1; j != -1; j--) {// j = 2 - 1 = 1
-                        if (matrixOfCoef[j][i].getNumerator() != 0) {
-                            Fractional coef = Fractional.division(matrixOfCoef[j][i], matrixOfCoef[i][i]);
-                            Fractional[] newRowCoef = matrixOfCoef[j];
-                            for (int k = matrixColumns - 1; k != i - 1; k--) {//k = 5 - 1 = 4
-                                Fractional subtractible = Fractional.multiplication(matrixOfCoef[i][k], coef);
-
-                                newRowCoef[k] = Fractional.subtraction(matrixOfCoef[j][k], subtractible);
-                            }
-                            matrixOfCoef[j] = newRowCoef;
-                        }
-                    }
-                }
-                System.out.println();
-                for (int t = 0; t != matrixOfCoef.length; t++) {
-                    System.out.println(Arrays.toString(matrixOfCoef[t]));
-                }
-                System.out.println();
-                i--;
-                if (i == -1) {
-                    flag = false;
-                }
-            }
-
-            System.out.println("Final");
-            for (int t = 0; t != matrixOfCoef.length; t++) {
-                System.out.println(Arrays.toString(matrixOfCoef[t]));
-            }
-            System.out.println("\n");
-            System.out.println("Возвращаем на место столбцы");
-            swapColumns(matrixOfCoef, startColums, baseX);
-            for (int t = 0; t != matrixOfCoef.length; t++) {
-                System.out.println(Arrays.toString(matrixOfCoef[t]));
-            }
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter("result.txt"))) {
-                writer.write("Итоговая матрица\n");
-                for (Fractional[] row : matrixOfCoef) {
-                    for (Fractional element : row) {
-                        writer.write(element.toString());
-                        writer.write(" ");
-                    }
-                    writer.newLine();
-                }
-            } catch (IOException e) {
-                System.out.println("Ошибка при записи в файл: " + e.getMessage());
-            }
-
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
+            System.exit(0);
         }
 
+        System.out.println("Обратный ход");
+        //Обратный ход
+        matrixOfCoef = backRunning(matrixOfCoef, matrixRows, matrixColumns);
+
+        System.out.println("Final");
+        for (int t = 0; t != matrixOfCoef.length; t++) {
+            System.out.println(Arrays.toString(matrixOfCoef[t]));
+        }
+        System.out.println("\n");
+
+        System.out.println("Возвращаем на место столбцы");
+        swapColumnsBack(matrixOfCoef, startColums, baseX);
+        for (int t = 0; t != matrixOfCoef.length; t++) {
+            System.out.println(Arrays.toString(matrixOfCoef[t]));
+        }
+
+        // Запись в файл
+        writeMatrixInFile("Итоговая матрица\n", matrixOfCoef);
+    }
+
+
+    static Fractional[][] backRunning(Fractional[][] matrixOfCoef, int matrixRows, int matrixColumns) {
+        boolean flag = true;
+        int i = matrixRows - 1;
+        while (flag) {
+            //проверяем что число не равно нулю, чтобы сделать из него единицу
+            if (matrixOfCoef[i][i].getNumerator() != 0) {
+                //пробегаем строчки ниже нашей
+                for (int j = i - 1; j != -1; j--) {// j = 2 - 1 = 1
+                    if (matrixOfCoef[j][i].getNumerator() != 0) {
+                        Fractional coef = Fractional.division(matrixOfCoef[j][i], matrixOfCoef[i][i]);
+                        Fractional[] newRowCoef = matrixOfCoef[j];
+                        for (int k = matrixColumns - 1; k != i - 1; k--) {//k = 5 - 1 = 4
+                            Fractional subtractible = Fractional.multiplication(matrixOfCoef[i][k], coef);
+
+                            newRowCoef[k] = Fractional.subtraction(matrixOfCoef[j][k], subtractible);
+                        }
+                        matrixOfCoef[j] = newRowCoef;
+                    }
+                }
+            }
+            System.out.println();
+            for (int t = 0; t != matrixOfCoef.length; t++) {
+                System.out.println(Arrays.toString(matrixOfCoef[t]));
+            }
+            System.out.println();
+            i--;
+            if (i == -1) {
+                flag = false;
+            }
+        }
+        return matrixOfCoef;
     }
 
     static void swapColumns(Fractional[][] matrix, Integer[] startColumns, Integer[] base) {
         Arrays.sort(startColumns);
         Arrays.sort(base);
-
+        System.out.println(Arrays.toString(startColumns));
+        System.out.println(Arrays.toString(base));
         for (int i = 0; i != startColumns.length; i++) {
             if (startColumns[i] != base[i]) {
                 for (int j = 0; j != matrix.length; j++) {
@@ -134,9 +116,30 @@ public class Main {
                     matrix[j][startColumns[i] - 1] = matrix[j][base[i] - 1];
                     matrix[j][base[i] - 1] = temp;
                 }
+                System.out.println();
+                for (int t = 0; t != matrix.length; t++) {
+                    System.out.println(Arrays.toString(matrix[t]));
+                }
+                System.out.println();
             }
         }
+    }
 
+    static void swapColumnsBack(Fractional[][] matrix, Integer[] startColumns, Integer[] base) {
+        for (int i = startColumns.length-1; i != -1; i--) {
+            if (startColumns[i] != base[i]) {
+                for (int j = 0; j != matrix.length; j++) {
+                    Fractional temp = matrix[j][startColumns[i] - 1];
+                    matrix[j][startColumns[i] - 1] = matrix[j][base[i] - 1];
+                    matrix[j][base[i] - 1] = temp;
+                }
+                System.out.println();
+                for (int t = 0; t != matrix.length; t++) {
+                    System.out.println(Arrays.toString(matrix[t]));
+                }
+                System.out.println();
+            }
+        }
     }
 
     static Fractional[][] straightRunning(Fractional[][] matrixOfCoef, int matrixRows, int matrixColums) {
@@ -155,7 +158,6 @@ public class Main {
                 matrixDeterminant[t][j] = matrixOfCoef[t][j];
             }
         }
-        System.out.println("Прямой ход");
         //Прямой ход
         while (flag) {
 
@@ -242,22 +244,58 @@ public class Main {
             for (int t = 0; t != matrixRows; t++) {
                 System.out.println(Arrays.toString(matrixDeterminant[t]));
             }
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter("result.txt"))) {
-                writer.write("Решения нет\n");
-                for (Fractional[] row : matrixDeterminant) {
-                    for (Fractional element : row) {
-                        writer.write(element.toString());
-                        writer.write(" ");
-                    }
-                    writer.newLine();
-                }
-                writer.write("Определитель равен " + Determinant);
-            } catch (IOException e) {
-                System.out.println("Ошибка при записи в файл: " + e.getMessage());
-            }
+            writeMatrixInFile("Решения нет\n Определитель равен " + Determinant, matrixDeterminant);
             return null;
         }
     }
 
+    static void writeMatrixInFile(String firstRow, Fractional[][] matrix) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("result.txt"))) {
+            for (Fractional[] row : matrix) {
+                for (Fractional element : row) {
+                    writer.write(element.toString());
+                    writer.write(" ");
+                }
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Ошибка при записи в файл: " + e.getMessage());
+        }
+    }
+
+    static HashMap<String, Object> readFile(String fileName) throws FileNotFoundException {
+
+        HashMap<String, Object> hashMap = new HashMap<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+            String[] matrixSize = br.readLine().split(" ");
+            System.out.println(Arrays.toString(matrixSize));
+
+            int matrixColumns = Integer.parseInt(matrixSize[1]);
+            int matrixRows = Integer.parseInt(matrixSize[0]);
+
+            Fractional[][] matrixOfCoef = new Fractional[matrixRows][matrixColumns];
+
+            for (int i = 0; i != matrixRows; i++) {
+                String[] vectorOfCoef = br.readLine().split(" ");
+                for (int j = 0; j != matrixColumns; j++) {
+                    matrixOfCoef[i][j] = Fractional.createFractional(vectorOfCoef[j]);
+                }
+            }
+
+            String[] baseXtemp = br.readLine().split(" ");
+
+            hashMap.put("baseXtemp", baseXtemp);
+            hashMap.put("matrixOfCoef", matrixOfCoef);
+            hashMap.put("matrixColumns", matrixColumns);
+            hashMap.put("matrixRows", matrixRows);
+
+            return hashMap;
+
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
 
 }

@@ -1,4 +1,4 @@
-package org.example;
+package org.example.Entity;
 
 public class Fractional {
     private long denominator;
@@ -84,7 +84,7 @@ public class Fractional {
         );
     }
 
-    static Fractional multiplication(Fractional fractionalFirst, Fractional fractionalSecond) {
+    public static Fractional multiplication(Fractional fractionalFirst, Fractional fractionalSecond) {
 
         return new Fractional(
                 fractionalFirst.getNumerator() * fractionalSecond.getNumerator(),
@@ -92,7 +92,7 @@ public class Fractional {
         );
     }
 
-    static Fractional subtraction(Fractional fractionalFirst, Fractional fractionalSecond) {
+    public static Fractional subtraction(Fractional fractionalFirst, Fractional fractionalSecond) {
 
         Fractional.commonDenominator(fractionalFirst, fractionalSecond);
         return new Fractional(
@@ -101,7 +101,7 @@ public class Fractional {
         );
     }
 
-    static Fractional division(Fractional fractionalFirst, Fractional fractionalSecond) {
+    public static Fractional division(Fractional fractionalFirst, Fractional fractionalSecond) {
 
         return new Fractional(
                 fractionalFirst.getNumerator() * fractionalSecond.getDenominator(),
@@ -136,7 +136,7 @@ public class Fractional {
         return false;
     }
 
-    static Fractional createFractional(String number) {
+    public static Fractional createFractional(String number) {
         if (number.contains("/")) {
             String[] fractionalSplit = number.split("/");
             if (isNumber(String.valueOf(fractionalSplit[0]))
