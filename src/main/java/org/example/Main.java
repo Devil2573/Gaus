@@ -3,8 +3,7 @@ package org.example;
 import org.example.Entity.Fractional;
 
 import java.io.*;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
 
 public class Main {
     public static void main(String[] args) throws FileNotFoundException {
@@ -14,12 +13,12 @@ public class Main {
         int matrixRows = 0;
         String[] baseXtemp = new String[0];
         Fractional[][] matrixOfCoef = new Fractional[0][];
-        if (hashMap!=null) {
+        if (hashMap != null) {
             matrixColumns = (int) hashMap.get("matrixColumns");
             matrixRows = (int) hashMap.get("matrixRows");
             baseXtemp = (String[]) hashMap.get("baseXtemp");
             matrixOfCoef = (Fractional[][]) hashMap.get("matrixOfCoef");
-        }else {
+        } else {
             System.exit(0);
         }
         Integer[] baseX = new Integer[baseXtemp.length];
@@ -28,7 +27,7 @@ public class Main {
             baseX[i] = Integer.parseInt(baseXtemp[i]);
             startColums[i] = i + 1;
         }
-        
+
         for (int i = 0; i != matrixOfCoef.length; i++) {
             System.out.println(Arrays.toString(matrixOfCoef[i]));
         }
@@ -36,12 +35,13 @@ public class Main {
         System.out.println("\n");
 
         System.out.println("Меняем столбцы местами для удобства");
-        swapColumns(matrixOfCoef, startColums, baseX);
-        for (int i = 0; i != matrixOfCoef.length; i++) {
-            System.out.println(Arrays.toString(matrixOfCoef[i]));
-        }
-        System.out.println("\n");
+        matrixOfCoef = swapColumns(matrixOfCoef, baseX);
 
+        System.out.println("\n");
+        for (int t = 0; t != matrixOfCoef.length; t++) {
+            System.out.println(Arrays.toString(matrixOfCoef[t]));
+        }
+        System.out.println();
         System.out.println("Прямой ход");
         //Прямой ход
         matrixOfCoef = straightRunning(matrixOfCoef, matrixRows, matrixColumns);
@@ -61,7 +61,7 @@ public class Main {
         System.out.println("\n");
 
         System.out.println("Возвращаем на место столбцы");
-        swapColumnsBack(matrixOfCoef, startColums, baseX);
+        matrixOfCoef = swapColumnsBack(matrixOfCoef, baseX);
         for (int t = 0; t != matrixOfCoef.length; t++) {
             System.out.println(Arrays.toString(matrixOfCoef[t]));
         }
@@ -104,42 +104,63 @@ public class Main {
         return matrixOfCoef;
     }
 
-    static void swapColumns(Fractional[][] matrix, Integer[] startColumns, Integer[] base) {
-        Arrays.sort(startColumns);
-        Arrays.sort(base);
-        System.out.println(Arrays.toString(startColumns));
-        System.out.println(Arrays.toString(base));
-        for (int i = 0; i != startColumns.length; i++) {
-            if (startColumns[i] != base[i]) {
-                for (int j = 0; j != matrix.length; j++) {
-                    Fractional temp = matrix[j][startColumns[i] - 1];
-                    matrix[j][startColumns[i] - 1] = matrix[j][base[i] - 1];
-                    matrix[j][base[i] - 1] = temp;
-                }
-                System.out.println();
-                for (int t = 0; t != matrix.length; t++) {
-                    System.out.println(Arrays.toString(matrix[t]));
-                }
-                System.out.println();
+    static Fractional[][] swapColumns(Fractional[][] matrix,Integer[] base) {
+        Fractional[][] tempMatrix = new Fractional[matrix.length][matrix[0].length];
+        ArrayList<Integer> baseList = new ArrayList<>(Arrays.asList(base));
+        for (int i = 1; i != matrix[0].length + 1; i++){
+            if (!baseList.contains(i)){
+                baseList.add(i);
             }
         }
+        base = baseList.toArray(new Integer[0]);
+        System.out.println(Arrays.toString(base));
+
+        for (int i = 0; i != matrix[0].length ; i++) {
+
+            for (int j = 0; j != matrix.length; j++) {
+                tempMatrix[j][i] = matrix[j][base[i] - 1];
+            }
+
+            for (int t = 0; t != matrix.length; t++) {
+                System.out.println(Arrays.toString(tempMatrix[t]));
+            }
+            System.out.println();
+        }
+
+        return tempMatrix;
     }
 
-    static void swapColumnsBack(Fractional[][] matrix, Integer[] startColumns, Integer[] base) {
-        for (int i = startColumns.length-1; i != -1; i--) {
-            if (startColumns[i] != base[i]) {
-                for (int j = 0; j != matrix.length; j++) {
-                    Fractional temp = matrix[j][startColumns[i] - 1];
-                    matrix[j][startColumns[i] - 1] = matrix[j][base[i] - 1];
-                    matrix[j][base[i] - 1] = temp;
-                }
-                System.out.println();
-                for (int t = 0; t != matrix.length; t++) {
-                    System.out.println(Arrays.toString(matrix[t]));
-                }
-                System.out.println();
+    static Fractional[][] swapColumnsBack(Fractional[][] matrix, Integer[] base) {
+        Fractional[][] tempMatrix = new Fractional[matrix.length][matrix[0].length];
+        ArrayList<Integer> baseList = new ArrayList<>(Arrays.asList(base));
+        ArrayList<Integer> startColumnsList = new ArrayList<>() ;
+        for (int i = 1; i != matrix[0].length + 1; i++){
+            if (!baseList.contains(i)){
+                baseList.add(i);
             }
+
         }
+        for (int i = 1; i != matrix[0].length + 1; i++){
+                startColumnsList.add(i);
+        }
+        base = baseList.toArray(new Integer[0]);
+        Integer[] startColumns = startColumnsList.toArray(new Integer[0]);
+        System.out.println(Arrays.toString(base));
+        System.out.println(Arrays.toString(startColumns));
+
+        for (int i = 0; i != matrix[0].length ; i++) {
+
+            for (int j = 0; j != matrix.length; j++) {
+                tempMatrix[j][base[i] - 1] = matrix[j][startColumns[i] - 1];
+            }
+
+            for (int t = 0; t != matrix.length; t++) {
+                System.out.println(Arrays.toString(tempMatrix[t]));
+            }
+            System.out.println();
+        }
+
+        return tempMatrix;
     }
 
     static Fractional[][] straightRunning(Fractional[][] matrixOfCoef, int matrixRows, int matrixColums) {
